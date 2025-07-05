@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Average Price Calculator</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2163346852890137"
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2163346852890137"
      crossorigin="anonymous"></script>
 
   <style>
@@ -123,20 +123,37 @@
     function addEntry() {
       const container = document.getElementById("entryContainer");
       const count = container.querySelectorAll(".qty").length + 1;
+      const wrapper = document.createElement("div");
+      wrapper.style.marginTop = '10px';
+
       const label = document.createElement("label");
       label.textContent = `Entry ${count}:`;
+
       const qty = document.createElement("input");
       qty.type = "number";
       qty.className = "qty";
       qty.placeholder = "Quantity";
+
       const price = document.createElement("input");
       price.type = "number";
       price.className = "price";
       price.placeholder = "Price";
       price.step = "0.01";
-      container.appendChild(label);
-      container.appendChild(qty);
-      container.appendChild(price);
+
+      const delBtn = document.createElement("span");
+      delBtn.innerHTML = "🗑️";
+      delBtn.style.cursor = 'pointer';
+      delBtn.title = 'Remove Entry';
+      delBtn.style.float = 'right';
+      delBtn.style.fontSize = '1.2em';
+      delBtn.style.marginTop = '5px';
+      delBtn.onclick = () => wrapper.remove();
+
+      wrapper.appendChild(label);
+      wrapper.appendChild(qty);
+      wrapper.appendChild(price);
+      label.appendChild(delBtn);
+      container.appendChild(wrapper);
     }
 
     function calculateAverage() {
