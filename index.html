@@ -7,37 +7,61 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2163346852890137"
      crossorigin="anonymous"></script>
+
   <style>
+    :root {
+      --bg-color: #f2f2f2;
+      --text-color: #333;
+      --input-bg: #fff;
+      --input-border: #ccc;
+      --button-bg: #4CAF50;
+      --button-hover: #45a049;
+      --result-color: #2c7a7b;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #121212;
+        --text-color: #e0e0e0;
+        --input-bg: #1e1e1e;
+        --input-border: #444;
+        --button-bg: #388e3c;
+        --button-hover: #2e7d32;
+        --result-color: #80cbc4;
+      }
+    }
+
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to right, #f2f2f2, #d9e2ec);
-      padding: 30px;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 60px 30px 30px 30px;
       max-width: 600px;
-      margin: auto;
+      margin: 60px auto 0 auto;
       border-radius: 12px;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     }
     h2 {
       text-align: center;
-      color: #333;
     }
     label {
       display: block;
       margin-top: 15px;
       font-weight: bold;
-      color: #444;
     }
     input {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
       font-size: 1em;
-      border: 1px solid #ccc;
+      background-color: var(--input-bg);
+      color: var(--text-color);
+      border: 1px solid var(--input-border);
       border-radius: 8px;
       box-sizing: border-box;
     }
     button {
-      background-color: #4CAF50;
+      background-color: var(--button-bg);
       color: white;
       padding: 12px;
       font-size: 1em;
@@ -49,56 +73,92 @@
       transition: background 0.3s ease;
     }
     button:hover {
-      background-color: #45a049;
+      background-color: var(--button-hover);
     }
     .result {
       margin-top: 25px;
       font-size: 1.3em;
       font-weight: bold;
-      color: #2c7a7b;
+      color: var(--result-color);
       text-align: center;
     }
     canvas {
       margin-top: 40px;
     }
+    .ads {
+      margin-top: 30px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
   <h2>📈 Stock Average Price Calculator</h2>
-  <label>Old Quantity:</label>
-  <input type="number" id="oldQty" value="8" />
-
-  <label>Old Average Price:</label>
-  <input type="number" id="oldAvg" value="104.5" step="0.01" />
-
-  <label>New Quantity:</label>
-  <input type="number" id="newQty" value="2" />
-
-  <label>Current Price:</label>
-  <input type="number" id="currentPrice" value="33" step="0.01" />
-
+  <div id="entryContainer">
+    <label>Old Quantity & Average Price:</label>
+    <input type="number" class="qty" placeholder="Quantity" value="8" />
+    <input type="number" class="price" placeholder="Price" value="104.5" step="0.01" />
+  </div>
+  <button onclick="addEntry()">➕ Add More</button>
   <button onclick="calculateAverage()">Calculate New Average</button>
 
   <div class="result" id="result"></div>
-
   <canvas id="priceChart" width="400" height="200"></canvas>
+
+  <div class="ads">
+    <!-- AdSense Placeholder -->
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+         data-ad-slot="YYYYYYYYYY"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
 
   <script>
     let chart;
 
+    function addEntry() {
+      const container = document.getElementById("entryContainer");
+      const count = container.querySelectorAll(".qty").length + 1;
+      const label = document.createElement("label");
+      label.textContent = `Entry ${count}:`;
+      const qty = document.createElement("input");
+      qty.type = "number";
+      qty.className = "qty";
+      qty.placeholder = "Quantity";
+      const price = document.createElement("input");
+      price.type = "number";
+      price.className = "price";
+      price.placeholder = "Price";
+      price.step = "0.01";
+      container.appendChild(label);
+      container.appendChild(qty);
+      container.appendChild(price);
+    }
+
     function calculateAverage() {
-      const oldQty = parseFloat(document.getElementById('oldQty').value);
-      const oldAvg = parseFloat(document.getElementById('oldAvg').value);
-      const newQty = parseFloat(document.getElementById('newQty').value);
-      const currentPrice = parseFloat(document.getElementById('currentPrice').value);
+      const qtys = Array.from(document.querySelectorAll('.qty')).map(i => parseFloat(i.value) || 0);
+      const prices = Array.from(document.querySelectorAll('.price')).map(i => parseFloat(i.value) || 0);
+      let totalQty = 0, totalCost = 0;
+      const chartLabels = [], chartData = [];
 
-      const totalQty = oldQty + newQty;
-      const newAverage = ((oldQty * oldAvg) + (newQty * currentPrice)) / totalQty;
+      for (let i = 0; i < qtys.length; i++) {
+        totalQty += qtys[i];
+        totalCost += qtys[i] * prices[i];
+        chartLabels.push(i === 0 ? 'Old Entry' : `Entry ${i+1}`);
+        chartData.push(prices[i]);
+      }
 
+      if (totalQty === 0) {
+        document.getElementById('result').textContent = 'Please enter valid quantities.';
+        return;
+      }
+
+      const newAverage = totalCost / totalQty;
       document.getElementById('result').textContent = `📊 New Average Price: ₹${newAverage.toFixed(2)}`;
-
-      const labels = ['Old Avg Price', 'New Buy Price', 'New Avg Price'];
-      const data = [oldAvg, currentPrice, newAverage];
 
       if (chart) chart.destroy();
 
@@ -106,25 +166,21 @@
       chart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: labels,
+          labels: chartLabels,
           datasets: [{
             label: 'Price (₹)',
-            data: data,
-            backgroundColor: ['#3e95cd', '#8e5ea2', '#3cba9f'],
+            data: chartData,
+            backgroundColor: chartData.map(() => '#3cba9f'),
             borderRadius: 6
           }]
         },
         options: {
           responsive: true,
           plugins: {
-            legend: {
-              display: false
-            },
+            legend: { display: false },
             tooltip: {
               callbacks: {
-                label: function(context) {
-                  return `₹${context.parsed.y.toFixed(2)}`;
-                }
+                label: context => `₹${context.parsed.y.toFixed(2)}`
               }
             }
           },
